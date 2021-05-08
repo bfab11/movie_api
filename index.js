@@ -13,7 +13,11 @@ let topMovies = [
         title: 'Marvel\'s Avengers'
     },
     {
-        title: 'Dodgeball'
+        title: 'Dodgeball',
+        description: 'Dodgeball: A True Underdog Story (also known simply as Dodgeball) is a 2004 American sports comedy film written and directed by Rawson Marshall Thurber and starring Vince Vaughn and Ben Stiller. The plot follows a group of misfits entering a Las Vegas dodgeball tournament to save their cherished local gym from the onslaught of a corporate health fitness chain.',
+        director: 'Rawson Marshall Thurber',
+        genre: 'Comedy'
+
     },
     {
         title: 'The Other Guys'
@@ -40,8 +44,50 @@ app.get('/movies', (req, res) => {
     res.json(topMovies.slice(0, 10));
 });
 
+//get movie by title
+app.get('/movies/:title', (req, res) => {
+    res.json(topMovies.find((topMovies) => {
+        return topMovies.title === req.params.title
+    }));
+});
+
+//get data about movie genre by name
+app.get('/movies/genres/:genre', (req, res) => {
+    res.send('Successful GET request for data about a movie genre by name')
+});
+
+//get director by name
+app.get('/movies/directors/:name', (req, res) => {
+    res.send('Successful GET request for information about the Director')
+});
+
+//register new user
+app.post('/users', (req, res) => {
+    res.send('Registration successful')
+});
+
+//update user info
+app.put('/users/:username', (req, res) => {
+    res.send('User ' + req.params.username + ' was successfully updated')
+});
+
+//add movie to Favorites
+app.post ('/users/:username/favorites', (req, res) => {
+    res.send('Movie: ' + req.params.title + ' was added to Favorites')
+});
+
+//delete movie from Favorites
+app.delete ('/users/:username/favorites/:title', (req, res) => {
+    res.send('Movie: ' + req.params.title + ' was deleted from Favorites')
+});
+
+//delete user
+app.delete('/users/:username', (req, res) => {
+    res.send('User ' + req.params.id + ' was successfully deleted')
+});
+
 //get starting request
-app.get('/', (req, res) =>{
+app.get('/', (req, res) => {
     res.send('Welcome to my top movies!');
 });
 
