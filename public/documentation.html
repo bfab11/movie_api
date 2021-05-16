@@ -41,11 +41,28 @@
                 <td>A JSON object holding data for all movies</td>
             </tr>
             <tr>
-                <td>Return data (description, genre, director, image URL) about a single movie by title</td>
+                <td>Return data (description, genre, director, image URL, whether it was featured or not) about a single movie by title</td>
                 <td>/movies/:title</td>
                 <td>GET</td>
                 <td>None</td>
-                <td>A JSON object holding data about a single movie containing its title, description, genre, director, and image</td>
+                <td>A JSON object holding data about a single movie containing its title, description, genre, director, image and if it was featured. <br><br>
+                Example: <br>
+                { <br>
+                    "Title" : "Rush Hour 2",<br>
+                    "Description: "Carter and Lee head to Hong Kong for a vacation, but become embroiled in a counterfeit money scam."<br>
+                    "Genre" : {<br>
+                        "Name" : "Comedy"<br>
+                        "Description" : "A comedy film is a category of film in which the main emphasis is on humor."<br>
+                    }<br>
+                    "Director" : {<br>
+                        "Name" : "Brett Ratner",<br>
+                        "Description" : "Brett Ratner is an American director and producer.",<br>
+                        "Birth" : "March 28, 1969",<br>
+                        "Death" : "N/A"<br>
+                    }<br>
+                    "ImagePath" : "rushhour2.jpg",<br>
+                    "Featured" : true
+                </td>
             </tr>
             <tr>
                 <td>Get data about a movie genre by name</td>
@@ -65,8 +82,21 @@
                 <td>Register New User</td>
                 <td>/users</td>
                 <td>POST</td>
-                <td>A JSON object containing data about the new user</td>
-                <td>A JSON object containing the new data to be added</td>
+                <td>A JSON object containing data about the new user <br>
+                Example: <br>
+                ID: Integer,<br>
+                Username: String (required), <br>
+                Password: String (required), <br>
+                Email: String (required), <br>
+                Birthday: Date
+                </td>
+                <td>A JSON object containing the new data to be added <br>
+                Example: <br>
+                "_id": "609ca370e93fe454e2efafc9" <br>
+                "Username": "trulynice",<br>
+                "Password": "nice123",<br>
+                "Email": "niceistruly@yahoo.com",<br>
+                "Birth_Date": "1991-07-06T00:00:00.000Z"</td>
             </tr>
             <tr>
                 <td>Update user info</td>
