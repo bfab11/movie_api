@@ -1,94 +1,24 @@
 const express = require('express');
 const morgan = require('morgan');
+const mongoose = require('mongoose');
+const Models = require('./models.js');
+const bodyParser = require('body-parser');
+
+const Movies = Models.Movie;
+const Users = Models.User;
 const app = express();
+mongoose.connect('mongodb://localhost:27017/myFlixDB', { useNewUrlParser: true, useUnifiedTopology: true });
 
-let topMovies = [
-    {
-        title: 'Star Wars'
-    },
-    {
-        title: 'Lord of the Rings'
-    },
-    {
-        title: 'Marvel\'s Avengers'
-    },
-    {
-        title: 'Dodgeball',
-        description: 'Dodgeball: A True Underdog Story (also known simply as Dodgeball) is a 2004 American sports comedy film written and directed by Rawson Marshall Thurber and starring Vince Vaughn and Ben Stiller. The plot follows a group of misfits entering a Las Vegas dodgeball tournament to save their cherished local gym from the onslaught of a corporate health fitness chain.',
-        director: 'Rawson Marshall Thurber',
-        genre: 'Comedy'
+app.use(bodyParser.json());
 
-    },
-    {
-        title: 'The Other Guys'
-    },
-    {
-        title: 'The Sandlot'
-    },
-    {
-        title: 'Harry Potter'
-    },
-    {
-        title: 'Elf'
-    },
-    {
-        title: 'School of Rock'
-    },
-    {
-        title: 'Rush Hour'
-    }
-];
-
-//get top movies
-app.get('/movies', (req, res) => {
-    res.json(topMovies.slice(0, 10));
-});
-
-//get movie by title
-app.get('/movies/:title', (req, res) => {
-    res.json(topMovies.find((topMovies) => {
-        return topMovies.title === req.params.title
-    }));
-});
-
-//get data about movie genre by name
-app.get('/movies/genres/:genre', (req, res) => {
-    res.send('Successful GET request for data about a movie genre by name')
-});
-
-//get director by name
-app.get('/movies/directors/:name', (req, res) => {
-    res.send('Successful GET request for information about the Director')
-});
-
-//register new user
-app.post('/users', (req, res) => {
-    res.send('Registration successful')
-});
-
-//update user info
-app.put('/users/:username', (req, res) => {
-    res.send('User ' + req.params.username + ' was successfully updated')
-});
-
-//add movie to Favorites
-app.post ('/users/:username/favorites', (req, res) => {
-    res.send('Movie: ' + req.params.title + ' was added to Favorites')
-});
-
-//delete movie from Favorites
-app.delete ('/users/:username/favorites/:title', (req, res) => {
-    res.send('Movie: ' + req.params.title + ' was deleted from Favorites')
-});
-
-//delete user
-app.delete('/users/:username', (req, res) => {
-    res.send('User ' + req.params.id + ' was successfully deleted')
+//listen for requests
+app.listen(8080, () => {
+    console.log('Your app is listening to port 8080.');
 });
 
 //get starting request
 app.get('/', (req, res) => {
-    res.send('Welcome to my top movies!');
+    res.send('Welcome to my myFlix app!');
 });
 
 //get documentation
@@ -106,7 +36,193 @@ app.use((err, req, res, next) => {
     res.status(500).send('Something broke!');
 });
 
-//listen for requests
-app.listen(8080, () => {
-    console.log('Your app is listening to port 8080.');
+//get all movies
+app.get('/movies', (req, res) => {
+    Movies.find()
+        .then((movies) => {
+            res.status(201).json(movies);
+        })
+        .catch((err) => {
+            console.error(err);
+            res.status(500).send('Error: ' + err);
+        });
 });
+
+//get movie by title
+app.get('/movies/:Title', (req, res) => {
+    Movies.findOne({ Title: req.params.Title })
+        .then((movie) => {
+            res.json(movie);
+        })
+        .catch((err) => {
+            console.error(err);
+            res.status(500).send('Error: ' + err);
+        });
+});
+
+//get data about movie genre by name
+app.get('/movies/genres/:Name', (req, res) => {
+    Movies.findOne({ 'Genre.Name' : req.params.Name})
+        .then((movie) => {
+            res.json(movie.Genre);
+        })
+        .catch((err) => {
+            console.error(err);
+            res.status(500).send('Error: ' + err);
+        });
+});
+
+//get director by name
+app.get('/movies/directors/:Name', (req, res) => {
+    Movies.findOne({ 'Director.Name' : req.params.Name })
+        .then((movie) => {
+            res.json(movie.Director);
+        })
+        .catch((err) => {
+            console.error(err);
+            res.status(500).send('Error: ' + err);
+        });
+});
+
+//register new user
+app.post('/users', (req,res) => {
+    Users.findOne({ Username: req.body.Username })
+        .then((user) => {
+            if(user) {
+                return res.status(400).send(req.body.Username + 'already exists');
+            } else {
+                Users
+                    .create({
+                        Username: req.body.Username,
+                        Password: req.body.Password,
+                        Email: req.body.Email,
+                        Birthday: req.body.Birthday
+                    })
+                    .then((user) => {res.status(201).json(user) })
+                    .catch((error) => {
+                        console.error(error);
+                        res.status(500).send('Error: ' + error);
+                    })
+            }
+        })
+        .catch((error) => {
+            console.error(error);
+            res.status(500).send('Error: ' + error);
+        });
+});
+
+//get all users
+app.get('/users', (req, res) => {
+    Users.find()
+        .then((users) => {
+            res.status(201).json(users);
+        })
+        .catch((err) => {
+            console.error(err);
+            res.status(500).send('Error: ' + err);
+        });
+});
+
+//get user by username
+app.get('/users/:Username', (req, res) => {
+    Users.findOne({ Username: req.params.Username })
+        .then((user) => {
+            res.json(user);
+        })
+        .catch((err) => {
+            console.error(err);
+            res.status(500).send('Error: ' + err);
+        });
+});
+
+//update user info by username
+app.put('/users/:Username', (req, res) => {
+    Users.findOneAndUpdate({ Username: req.params.Username }, { $set:
+    {
+        Username: req.body.Username,
+        Password: req.body.Password,
+        Email: req.body.Email,
+        Birthday: req.body.Birthday
+    }
+ },
+ { new: true }, // makes sure the updated document is returned
+ (err, updatedUser) => {
+     if(err) {
+         console.error(err);
+         res.status(500).send('Error: ' + err);
+     }   else {
+         res.json(updatedUser);
+     }
+ });
+});
+
+//add movie to a user's list of Favorites
+app.post('/users/:Username/favorites/:MovieID', (req, res) => {
+    Users.findOneAndUpdate({ Username: req.params.Username},
+  {$push: {FavoriteMovies: req.params.MovieID}},
+  {new: true},
+  (err, updatedUser) => {
+      if (err) {
+        console.error(err);
+        res.status(500).send('Error: ' + err);
+      } else {
+        res.json(updatedUser);
+        };
+      });
+    });
+
+//delete movie from a user's list of Favorites
+app.delete('/users/:Username/favorites/:MovieID', (req, res) => {
+    Users.findOneAndUpdate({Username: req.params.Username},
+    {$pull: {FavoriteMovies: req.params.MovieID}},
+    {new: true},
+    (err, updatedUser) => {
+      if(err) {
+        console.error(err);
+        res.status(500).send('Error: ' + err);
+      } else {
+        res.json(updatedUser);
+      };
+    });
+});
+
+//delete user by username
+app.delete('/users/:Username', (req, res) => {
+    Users.findOneAndRemove({ Username: req.params.Username })
+        .then((user) => {
+            if (!user) {
+                res.status(400).send(req.params.Username + ' was not found');
+            } else {
+                res.status(200).send(req.params.Username + ' was delete.');
+            }
+        })
+        .catch((err) => {
+            console.error(err);
+            res.status(500).send('Error' + err);
+        });
+});
+
+// //get starting request
+// app.get('/', (req, res) => {
+//     res.send('Welcome to my myFlix app!');
+// });
+
+// //get documentation
+// app.use(express.static('public'));
+// app.get('/documentation', (req, res) => {
+//     res.sendFile('public/documentation.html', {root: __dirname});
+// });
+
+// //logs to terminal
+// app.use(morgan('common'));
+
+// //error-handling middleware
+// app.use((err, req, res, next) => {
+//     console.log(err.stack);
+//     res.status(500).send('Something broke!');
+// });
+
+// //listen for requests
+// app.listen(8080, () => {
+//     console.log('Your app is listening to port 8080.');
+// });
