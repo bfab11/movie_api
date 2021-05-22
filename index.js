@@ -17,7 +17,7 @@ mongoose.connect(process.env.CONNECTION_URI, {useNewUrlParser: true, useUnifiedT
 
 app.use(bodyParser.json());
 
-let auth = require('./auth')(app);
+let auth = require('./auth')(app)
 
 let allowedOrigins = ['http://localhost:8080', 'https://git.heroku.com/myflixdbapp.git'];
 app.use(cors({
