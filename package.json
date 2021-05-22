@@ -4,7 +4,8 @@
   "description": "Achievement 2 Project",
   "main": "index.js",
   "scripts": {
-    "node": "index.js"
+    "start":"node index.js",
+    "test": "echo \"Error: notest specified\" && exit1"
   },
   "repository": {
     "type": "git",

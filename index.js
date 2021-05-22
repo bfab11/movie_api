@@ -13,13 +13,13 @@ const app = express();
 const cors = require('cors');
 app.use(cors());
 // mongoose.connect('mongodb://localhost:27017/myFlixDB', { useNewUrlParser: true, useUnifiedTopology: true });
-mongoose.connect( process.env.CONNECTION_URI, { useNewUrlParser: true, useUnifiedTopology: true });
+mongoose.connect(process.env.CONNECTION_URI, {useNewUrlParser: true, useUnifiedTopology: true});
 
 app.use(bodyParser.json());
 
 let auth = require('./auth')(app);
 
-let allowedOrigins = {'http://localhost:8080', 'http://testsite.com'};
+let allowedOrigins = ['http://localhost:8080', 'https://git.heroku.com/myflixdbapp.git'];
 app.use(cors({
     origin: (origin, callback) => {
         if (!origin) return callback(null, true);
@@ -31,12 +31,6 @@ app.use(cors({
         return callback(null, true);
     }
 }));
-
-//listen for requests
-const port = process.send.PORT || 8080;
-app.listen(port, '0.0.0.0', () => {
-    console.log('Listening on Port ' + port);
-});
 
 //get starting request
 app.get('/', (req, res) => {
@@ -232,27 +226,8 @@ app.delete('/users/:Username', passport.authenticate('jwt', { session: false }),
         });
 });
 
-// //get starting request
-// app.get('/', (req, res) => {
-//     res.send('Welcome to my myFlix app!');
-// });
-
-// //get documentation
-// app.use(express.static('public'));
-// app.get('/documentation', (req, res) => {
-//     res.sendFile('public/documentation.html', {root: __dirname});
-// });
-
-// //logs to terminal
-// app.use(morgan('common'));
-
-// //error-handling middleware
-// app.use((err, req, res, next) => {
-//     console.log(err.stack);
-//     res.status(500).send('Something broke!');
-// });
-
-// //listen for requests
-// app.listen(8080, () => {
-//     console.log('Your app is listening to port 8080.');
-// });
+//Listen for requests
+const port = process.env.PORT || 8080;
+app.listen(port, '0.0.0.0', () => {
+  console.log('Listening on Port' + port);
+})
