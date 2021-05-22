@@ -5,19 +5,36 @@ const Models = require('./models.js');
 const bodyParser = require('body-parser');
 const passport = require('passport');
 require('./passport');
+const { check, validationResult } = require('express-validator');
 
 const Movies = Models.Movie;
 const Users = Models.User;
 const app = express();
+const cors = require('cors');
+app.use(cors());
 mongoose.connect('mongodb://localhost:27017/myFlixDB', { useNewUrlParser: true, useUnifiedTopology: true });
 
 app.use(bodyParser.json());
 
 let auth = require('./auth')(app);
 
+let allowedOrigins = {'http://localhost:8080', 'http://testsite.com'};
+app.use(cors({
+    origin: (origin, callback) => {
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.indexOf(origin) === -1) { // If a specific origin isn't found on the list of allowed origins
+            let message = 'The CORS policy for this application does not allow access from the origin'
+        origin;
+            return callback(new Error(message), false);
+        }
+        return callback(null, true);
+    }
+}));
+
 //listen for requests
-app.listen(8080, () => {
-    console.log('Your app is listening to port 8080.');
+const port = process.send.PORT || 8080;
+app.listen(port, '0.0.0.0', () => {
+    console.log('Listening on Port ' + port);
 });
 
 //get starting request
@@ -89,25 +106,33 @@ app.get('/movies/directors/:Name', passport.authenticate('jwt', { session: false
 });
 
 //register new user
-app.post('/users', (req,res) => {
-    Users.findOne({ Username: req.body.Username })
-        .then((user) => {
-            if(user) {
-                return res.status(400).send(req.body.Username + 'already exists');
-            } else {
-                Users
-                    .create({
-                        Username: req.body.Username,
-                        Password: req.body.Password,
-                        Email: req.body.Email,
-                        Birthday: req.body.Birthday
-                    })
-                    .then((user) => {res.status(201).json(user) })
-                    .catch((error) => {
-                        console.error(error);
-                        res.status(500).send('Error: ' + error);
-                    })
-            }
+app.post('/users', 
+    // Validation logic here for request
+    [
+        check('Username', 'Username is required').isLength({min:5}),
+        check('Username', 'Username contains non alphanumeric characters - not allowed.').isAlphanumeric(),
+        check('Password', 'Password is required').not().isEmpty(),
+        check('Email', 'Email does not appear to be valid').isEmail()
+    ], (req,res) => {
+        let hashedPassword = Users.hashPassword(req.body.Password);
+        Users.findOne({ Username: req.body.Username }) // Seach to see if a user with the requested username already exists
+            .then((user) => {
+                if(user) { // If the user is found, send a response that it already exists
+                    return res.status(400).send(req.body.Username + 'already exists');
+                 } else {
+                    Users
+                        .create({
+                            Username: req.body.Username,
+                            Password: req.body.Password,
+                            Email: req.body.Email,
+                            Birthday: req.body.Birthday
+                        })
+                        .then((user) => {res.status(201).json(user) })
+                        .catch((error) => {
+                            console.error(error);
+                            res.status(500).send('Error: ' + error);
+                        })
+                }
         })
         .catch((error) => {
             console.error(error);
