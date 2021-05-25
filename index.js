@@ -46,12 +46,6 @@ app.get('/documentation', (req, res) => {
 //logs to terminal
 app.use(morgan('common'));
 
-//error-handling middleware
-app.use((err, req, res, next) => {
-    console.log(err.stack);
-    res.status(500).send('Something broke!');
-});
-
 //get all movies
 app.get('/movies', passport.authenticate('jwt', { session: false }), (req, res) => {
     Movies.find()
@@ -118,7 +112,7 @@ app.post('/users',
                     Users
                         .create({
                             Username: req.body.Username,
-                            Password: req.body.Password,
+                            Password: hashedPassword,
                             Email: req.body.Email,
                             Birthday: req.body.Birthday
                         })
@@ -160,11 +154,21 @@ app.get('/users/:Username', (req, res) => {
 });
 
 //update user info by username
-app.put('/users/:Username', passport.authenticate('jwt', { session: false }), (req, res) => {
+app.put('/users/:Username', passport.authenticate('jwt', { session: false }), 
+    [
+    check('Username', 'Username is required').isLength({min: 5}),
+    check('Username', 'Username contains non alphanumeric characters - not allowed.').isAlphanumeric(),
+    check('Password', 'Password is required').not().isEmpty(),
+    check('Email', 'Email does not appear to be valid').isEmail()], (req, res) => {
+    let errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({errors: errors.array()});
+    };
+    let hashedPassword = Users.hashPassword(req.body.Password);
     Users.findOneAndUpdate({ Username: req.params.Username }, { $set:
     {
         Username: req.body.Username,
-        Password: req.body.Password,
+        Password: hashedPassword,
         Email: req.body.Email,
         Birthday: req.body.Birthday
     }
@@ -224,6 +228,12 @@ app.delete('/users/:Username', passport.authenticate('jwt', { session: false }),
             console.error(err);
             res.status(500).send('Error' + err);
         });
+});
+
+//error-handling middleware
+app.use((err, req, res, next) => {
+    console.log(err.stack);
+    res.status(500).send('Something broke!');
 });
 
 //Listen for requests
