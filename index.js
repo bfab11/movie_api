@@ -21,7 +21,7 @@ const app = express();
 
 app.use(bodyParser.json());
 
-let auth = require('./auth')(app)
+let auth = require('./auth')(app);
 
 let allowedOrigins = ['http://localhost:8080', 'https://git.heroku.com/myflixdbapp.git'];
 app.use(cors({
