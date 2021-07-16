@@ -23,7 +23,7 @@ app.use(bodyParser.json());
 
 let auth = require('./auth')(app);
 
-let allowedOrigins = ['http://localhost:8080', 'http://localhost:1234', 'https://git.heroku.com/myflixdbapp.git'];
+let allowedOrigins = ['http://localhost:8080', 'http://localhost:1234', 'https://myflixdbapp.herokuapp.com'];
 app.use(cors({
     origin: (origin, callback) => {
         if (!origin) return callback(null, true);
