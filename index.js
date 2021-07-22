@@ -3,7 +3,7 @@ const express = require('express'),
     mongoose = require('mongoose'),
     Models = require('./models.js'),
     bodyParser = require('body-parser'),
-    passport = require('passport')
+    passport = require('passport'),
     cors = require('cors');
 
 require('./passport');
